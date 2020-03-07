@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">DetailsDemo</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="mobile">Mobile No</string>
+    <string name="gender">Gender</string>
+    <string name="address">Address</string>
+</resources>
