@@ -19,6 +19,7 @@ import androidx.databinding.DataBindingUtil
 import com.example.detailsdemo.databinding.ActivityEditBinding
 import kotlinx.android.synthetic.main.activity_edit.*
 import java.io.*
+import java.lang.Exception
 import java.util.*
 
 @Suppress("DEPRECATION")
@@ -44,13 +45,11 @@ class EditActivity : AppCompatActivity() {
         }
 
         var bmp:Bitmap ?= null
-        val file:String ?= intent.getStringExtra("imageView")
         try{
-            val fis: FileInputStream = this.openFileInput(file)
-            bmp = BitmapFactory.decodeStream(fis)
-            fis.close()
+            bmp = BitmapFactory.decodeByteArray(user.image, 0 , user.image!!.size)
+
         }
-        catch (e: java.lang.Exception){
+        catch (e: Exception){
             e.printStackTrace()
         }
         findViewById<ImageView>(R.id.imageView).setImageBitmap(bmp)
@@ -68,35 +67,24 @@ class EditActivity : AppCompatActivity() {
             } else {
                 genderResult = "female"
             }
-
             user.gender = genderResult
 
             val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("userReturn",user)
 
-
-            if(flag == 0) {
                 val image = findViewById<ImageView>(R.id.imageView)
                 bitmapRes = (image.getDrawable() as BitmapDrawable).getBitmap()
-            }
+
+            var fileR:ByteArray ?= null
             try {
-                //Write file
-                val filename = "bitmap.png"
-                val stream: FileOutputStream =
-                    this.openFileOutput(filename, Context.MODE_PRIVATE)
+                val stream = ByteArrayOutputStream()
                 bitmapRes.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                fileR= stream.toByteArray()
 
-                //Cleanup
-                stream.close()
-                bitmapRes.recycle()
-
-                //Pop intent
-
-                intent.putExtra("image", filename)
-
-            } catch (e: Exception) {
+            } catch ( e: Exception) {
                 e.printStackTrace()
             }
+            user.image = fileR
+            intent.putExtra("userReturn",user)
             setResult(Activity.RESULT_OK, intent)
             finish()
         }
@@ -169,7 +157,7 @@ class EditActivity : AppCompatActivity() {
         {
             val thumbnail = data!!.extras!!.get("data") as Bitmap
             imageview!!.setImageBitmap(thumbnail)
-            saveImage(thumbnail)
+//            saveImage(thumbnail)
             Toast.makeText(this, "Image Saved!", Toast.LENGTH_SHORT).show()
         }
     }
