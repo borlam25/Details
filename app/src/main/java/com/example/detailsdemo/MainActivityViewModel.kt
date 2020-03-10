@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 class MainActivityViewModel:ViewModel(){
     val user:User
     init{
-        user=User("","","","","")
+        val ba:ByteArray = byteArrayOf()
+        user=User("","","","","",ba)
     }
 }

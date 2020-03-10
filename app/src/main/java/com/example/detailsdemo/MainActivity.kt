@@ -18,14 +18,16 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.detailsdemo.databinding.ActivityMainBinding
 import kotlinx.android.synthetic.main.activity_edit.view.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
-    var binding:ActivityMainBinding ?= null
-    var user :User ?= null
+    lateinit var binding:ActivityMainBinding
+    lateinit var user :User
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        setContentView(R.layout.activity_main)
@@ -33,41 +35,54 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
         var mainActivityViewModel : MainActivityViewModel = ViewModelProvider(this) [MainActivityViewModel::class.java]
 
-        binding?.user = mainActivityViewModel.user
-        user = mainActivityViewModel.user
+        user = intent.getSerializableExtra("data") as User
+        val position = intent.getIntExtra("position",0)
+        binding.user = user
+        var bmp:Bitmap ?= null
+        try {
+            bmp = BitmapFactory.decodeByteArray(user.image, 0 , user.image!!.size)
+        }
+        catch (e: Exception){
+            e.printStackTrace()
+        }
+        imageViewMain.setImageBitmap(bmp)
+
         edit.setOnClickListener{
-
-            user?.name = nameV.text.toString()
-            user?.email = emailV.text.toString()
-            user?.mobile = mobileV.text.toString()
-            user?.gender = genderV.text.toString()
-            user?.address = addressV.text.toString()
-
-            val intent = Intent(this,EditActivity::class.java)
-
-            intent.putExtra("user",user)
-            val image = findViewById<ImageView>(R.id.imageView)
+            val image = findViewById<ImageView>(R.id.imageViewMain)
             val bitmap:Bitmap = (image.getDrawable() as BitmapDrawable).getBitmap()
-
+            var file:ByteArray ?= null
             try {
-                //Write file
-                val  filename = "bitmap.png"
-                val stream: FileOutputStream = this.openFileOutput(filename, Context.MODE_PRIVATE)
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-
-                //Cleanup
-                stream.close()
-                bitmap.recycle()
-
-                //Pop intent
-
-                intent.putExtra("imageView", filename)
+                val stream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                file = stream.toByteArray()
 
             } catch ( e:Exception ) {
                 e.printStackTrace()
             }
 
+            user.name = nameV.text.toString()
+            user.email = emailV.text.toString()
+            user.mobile = mobileV.text.toString()
+            user.gender = genderV.text.toString()
+            user.address = addressV.text.toString()
+            user.image = file
+            val intent = Intent(this,EditActivity::class.java)
+
+            intent.putExtra("user",user)
+
             startActivityForResult(intent,10)
+        }
+
+        done.setOnClickListener {
+            val returnIntent: Intent = Intent(this,ListActivity::class.java)
+
+//            val image = findViewById<ImageView>(R.id.imageViewMain)
+//            val bitmap:Bitmap = (image.getDrawable() as BitmapDrawable).getBitmap()
+
+            returnIntent.putExtra("returnData",user)
+            returnIntent.putExtra("returnPosition",position)
+            setResult(Activity.RESULT_OK, returnIntent)
+            finish()
         }
     }
 
@@ -75,25 +90,25 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(data!=null){
             if(resultCode == Activity.RESULT_OK ) {
-                val u:User = data.getSerializableExtra("userReturn") as User
-                user?.name = u.name
-                user?.email = u.email
-                user?.gender = u.gender
-                user?.mobile = u.mobile
-                user?.address = u.address
-                binding?.invalidateAll()
 
+                val u = data.getSerializableExtra("userReturn") as User
+
+                user.name = u.name
+                user.email = u.email
+                user.mobile = u.mobile
+                user.gender = u.gender
+                user.address = u.address
+                user.image = u.image
+                binding.invalidateAll()
                 var bmp:Bitmap ?= null
-                val file:String = data.extras?.get("image").toString()
-                try{
-                    val fis:FileInputStream = this.openFileInput(file)
-                    bmp = BitmapFactory.decodeStream(fis)
-                    fis.close()
+                try {
+                    bmp = BitmapFactory.decodeByteArray(user.image, 0 , user.image!!.size)
                 }
                 catch (e:Exception){
                     e.printStackTrace()
                 }
-                findViewById<ImageView>(R.id.imageView).setImageBitmap(bmp)
+
+                findViewById<ImageView>(R.id.imageViewMain).setImageBitmap(bmp)
 
             }
         }
