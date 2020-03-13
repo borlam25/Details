@@ -4,14 +4,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ListActivity">
+    tools:context=".ListActivity"
+    android:background="#FFFFFF">
 
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <include
+        android:id="@+id/listBar"
+        layout="@layout/list_action_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:src="@drawable/plus_icon"
+        app:backgroundTint="@color/colorPrimaryLight"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:maxImageSize="36dp" />
+
+    <fragment
+        android:id="@+id/fragment"
+        android:name="com.example.detailsdemo.ListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@id/listBar"
+        app:layout_constraintTop_toBottomOf="@id/listBar"
+        app:layout_constraintVertical_bias="1.0"
+        android:tag="FRAGMENT_TAG" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

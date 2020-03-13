@@ -1,28 +1,40 @@
 package com.example.detailsdemo
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ListView
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+
+import kotlinx.android.synthetic.main.activity_list.*
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
 
 class ListActivity : AppCompatActivity() {
-    lateinit var customListAdapter:CustomListAdapter
-    val array = ArrayList<User>()
+
+    lateinit var newUser:User
+    var flag =0
     @SuppressLint("WrongThread")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
-        val listView: ListView = this.findViewById(R.id.listView)
+        val toolbar: Toolbar = listBar as Toolbar
+        setSupportActionBar(toolbar)
 
-
-        customListAdapter = CustomListAdapter(this, array)
         val bitmap = arrayOfNulls<Bitmap>(4)
         bitmap[0] = BitmapFactory.decodeResource(resources,R.drawable.user1)
         bitmap[1] = BitmapFactory.decodeResource(resources,R.drawable.user2)
@@ -39,54 +51,82 @@ class ListActivity : AppCompatActivity() {
                 //Cleanup
 
                 //Pop intent
-
             } catch ( e:Exception ) {
                 e.printStackTrace()
             }
         }
 
-        array.add(User("Praneeth","p@g.com","9493220216","male","nzb",file[0]))
-        array.add(User("Divya","d@g.com","9493220516","female","hyd",file[1]))
-        array.add(User("Haripriya","h@g.com","9498620216","female","sec",file[2]))
-        array.add(User("Tyrion","t@g.com","9493236216","male","ban",file[3]))
+        UsersArray.array.add(User("Praneeth","p@g.com","9493220216","male","nzb",file[0]))
+        UsersArray.array.add(User("Divya","d@g.com","9493220516","female","hyd",file[1]))
+        UsersArray.array.add(User("Haripriya","h@g.com","9498620216","female","sec",file[2]))
+        UsersArray.array.add(User("Tyrion","t@g.com","9493236216","male","ban",file[3]))
+        UsersArray.array.add(User("Praneeth","p@g.com","9493220216","male","nzb",file[0]))
+        UsersArray.array.add(User("Divya","d@g.com","9493220516","female","hyd",file[1]))
+        UsersArray.array.add(User("Haripriya","h@g.com","9498620216","female","sec",file[2]))
+        UsersArray.array.add(User("Tyrion","t@g.com","9493236216","male","ban",file[3]))
+        UsersArray.array.add(User("Praneeth","p@g.com","9493220216","male","nzb",file[0]))
+        UsersArray.array.add(User("Divya","d@g.com","9493220516","female","hyd",file[1]))
+        UsersArray.array.add(User("Haripriya","h@g.com","9498620216","female","sec",file[2]))
+        UsersArray.array.add(User("Tyrion","t@g.com","9493236216","male","ban",file[3]))
 
-        listView.adapter = customListAdapter
+        fab.setOnClickListener {
+            val ba:ByteArray ?= null
+             newUser = User("","","","","",ba)
 
-        listView.setOnItemClickListener { parent, view, position, id ->
-
-            Toast.makeText(this, "Clicked item : $position",Toast.LENGTH_SHORT).show()
-            val data:User = parent.getItemAtPosition(position) as User
-
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("data", data)
-            intent.putExtra("position", position)
-
-            this.startActivityForResult(intent,12)
+            val newIntent = Intent(this, EditActivity::class.java)
+            newIntent.putExtra("newUser",newUser)
+            newIntent.putExtra("callingActivity",1)
+            startActivityForResult(newIntent,15)
         }
+    }
+    lateinit var menu:Menu
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        this.menu = menu!!
+        val inflater = menuInflater
+        inflater.inflate(R.menu.toolbar_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        var fragment:Fragment
+        if(item.title == "grid"){
+            item.title = "list"
+            item.setIcon(R.drawable.list)
+            flag = 1
+            fragment = GridFragment()
+            //var fm:FragmentManager = getAct getSupportFragmentManager()
+            var ft: FragmentTransaction =getSupportFragmentManager().beginTransaction()
+            ft.replace(R.id.fragment, fragment)
+            ft.commit()
+        }
+        else{
+            item.title = "grid"
+            item.setIcon(R.drawable.grid)
+            flag = 0
+            fragment = ListFragment()
+            //var fm:FragmentManager = getAct getSupportFragmentManager()
+            var ft: FragmentTransaction =getSupportFragmentManager().beginTransaction()
+            ft.replace(R.id.fragment, fragment)
+            ft.commit()
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d("Activity","dvghad")
-        if(data != null){
-           val pos = data.getIntExtra("returnPosition",0)
-            val user = data.getSerializableExtra("returnData") as User
-            val dataU = customListAdapter.getItem(pos)
-            dataU?.name = user.name
-            dataU?.email = user.email
-            dataU?.mobile = user.mobile
-            dataU?.gender = user.gender
-            dataU?.address = user.address
-            dataU?.image = user.image
-            Log.d("Activity",dataU?.name)
-            if (dataU != null) {
-                array.set(pos,dataU)
+        Log.d("Grid","sfs")
+        if(requestCode == 15)
+        {
+            if(data!=null){
+                newUser = data.getSerializableExtra("userReturn") as User
+                UsersArray.array.add(newUser)
             }
-            customListAdapter.notifyDataSetChanged()
-//            customListAdapter = CustomListAdapter(this, array)
         }
-
-
+        if(flag == 0)
+            customListAdapter.notifyDataSetChanged()
+        if(flag == 1)
+            customGridAdapter.notifyDataSetChanged()
     }
 }

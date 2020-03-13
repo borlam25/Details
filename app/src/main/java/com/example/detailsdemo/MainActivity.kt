@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var binding:ActivityMainBinding
     lateinit var user :User
-
+    var position :Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        setContentView(R.layout.activity_main)
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         var mainActivityViewModel : MainActivityViewModel = ViewModelProvider(this) [MainActivityViewModel::class.java]
 
         user = intent.getSerializableExtra("data") as User
-        val position = intent.getIntExtra("position",0)
+         position = intent.getIntExtra("position",0)
         binding.user = user
         var bmp:Bitmap ?= null
         try {
@@ -46,7 +47,6 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
         imageViewMain.setImageBitmap(bmp)
-
         edit.setOnClickListener{
             val image = findViewById<ImageView>(R.id.imageViewMain)
             val bitmap:Bitmap = (image.getDrawable() as BitmapDrawable).getBitmap()
@@ -69,23 +69,19 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this,EditActivity::class.java)
 
             intent.putExtra("user",user)
-
+            intent.putExtra("callingActivity",0)
             startActivityForResult(intent,10)
         }
 
-        done.setOnClickListener {
-            val returnIntent: Intent = Intent(this,ListActivity::class.java)
-
-//            val image = findViewById<ImageView>(R.id.imageViewMain)
-//            val bitmap:Bitmap = (image.getDrawable() as BitmapDrawable).getBitmap()
-
-            returnIntent.putExtra("returnData",user)
-            returnIntent.putExtra("returnPosition",position)
-            setResult(Activity.RESULT_OK, returnIntent)
-            finish()
+        mobile.setOnClickListener {
+            val intent = Intent(Intent.ACTION_DIAL)
+            intent.setData(Uri.parse("+91"+mobile.text))
+            startActivity(intent)
         }
     }
-
+    override fun onBackPressed(){
+        finish()
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(data!=null){
@@ -100,6 +96,7 @@ class MainActivity : AppCompatActivity() {
                 user.address = u.address
                 user.image = u.image
                 binding.invalidateAll()
+                UsersArray.array.set(position,u)
                 var bmp:Bitmap ?= null
                 try {
                     bmp = BitmapFactory.decodeByteArray(user.image, 0 , user.image!!.size)
@@ -107,9 +104,7 @@ class MainActivity : AppCompatActivity() {
                 catch (e:Exception){
                     e.printStackTrace()
                 }
-
                 findViewById<ImageView>(R.id.imageViewMain).setImageBitmap(bmp)
-
             }
         }
     }

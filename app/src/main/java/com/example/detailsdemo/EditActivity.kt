@@ -34,64 +34,103 @@ class EditActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit)
-        val binding :ActivityEditBinding = DataBindingUtil.setContentView(this,R.layout.activity_edit)
-        val user = intent.getSerializableExtra("user") as User
-        binding.user=user
+        val call =intent.getIntExtra("callingActivity",0)
+        if(call == 1){
+            imageView.setImageResource(R.drawable.user)
+            val newUser =intent.getSerializableExtra("newUser") as User
+            save.setOnClickListener {
+                newUser.name = nameText.text.toString()
+                newUser.email = emailText.text.toString()
+                newUser.mobile = mobileText.text.toString()
+                newUser.address = addressText.text.toString()
+                val genderResult: String
 
-        if (user.gender == "male") {
-            radioGroup.check(R.id.maleButton)
-        } else {
-            radioGroup.check(R.id.femaleButton)
-        }
+                if (maleButton.isChecked) {
+                    genderResult = "male"
+                } else {
+                    genderResult = "female"
+                }
+                newUser.gender = genderResult
 
-        var bmp:Bitmap ?= null
-        try{
-            bmp = BitmapFactory.decodeByteArray(user.image, 0 , user.image!!.size)
-
-        }
-        catch (e: Exception){
-            e.printStackTrace()
-        }
-        findViewById<ImageView>(R.id.imageView).setImageBitmap(bmp)
-
-
-        save.setOnClickListener {
-            user.name = nameText.text.toString()
-            user.email = emailText.text.toString()
-            user.mobile = mobileText.text.toString()
-            user.address = addressText.text.toString()
-            val genderResult: String
-
-            if (maleButton.isChecked) {
-                genderResult = "male"
-            } else {
-                genderResult = "female"
-            }
-            user.gender = genderResult
-
-            val intent = Intent(this, MainActivity::class.java)
+                val intent = Intent(this, ListActivity::class.java)
 
                 val image = findViewById<ImageView>(R.id.imageView)
                 bitmapRes = (image.getDrawable() as BitmapDrawable).getBitmap()
 
-            var fileR:ByteArray ?= null
-            try {
-                val stream = ByteArrayOutputStream()
-                bitmapRes.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                fileR= stream.toByteArray()
+                var fileR: ByteArray? = null
+                try {
+                    val stream = ByteArrayOutputStream()
+                    bitmapRes.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                    fileR = stream.toByteArray()
 
-            } catch ( e: Exception) {
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                newUser.image = fileR
+                intent.putExtra("userReturn", newUser)
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            }
+        }
+        else {
+            val binding: ActivityEditBinding =
+                DataBindingUtil.setContentView(this, R.layout.activity_edit)
+            val user = intent.getSerializableExtra("user") as User
+            binding.user = user
+
+            if (user.gender == "male") {
+                radioGroup.check(R.id.maleButton)
+            } else {
+                radioGroup.check(R.id.femaleButton)
+            }
+
+            var bmp: Bitmap? = null
+            try {
+                bmp = BitmapFactory.decodeByteArray(user.image, 0, user.image!!.size)
+
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
-            user.image = fileR
-            intent.putExtra("userReturn",user)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+            findViewById<ImageView>(R.id.imageView).setImageBitmap(bmp)
+
+
+            save.setOnClickListener {
+                user.name = nameText.text.toString()
+                user.email = emailText.text.toString()
+                user.mobile = mobileText.text.toString()
+                user.address = addressText.text.toString()
+                val genderResult: String
+
+                if (maleButton.isChecked) {
+                    genderResult = "male"
+                } else {
+                    genderResult = "female"
+                }
+                user.gender = genderResult
+
+                val intent = Intent(this, MainActivity::class.java)
+
+                val image = findViewById<ImageView>(R.id.imageView)
+                bitmapRes = (image.getDrawable() as BitmapDrawable).getBitmap()
+
+                var fileR: ByteArray? = null
+                try {
+                    val stream = ByteArrayOutputStream()
+                    bitmapRes.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                    fileR = stream.toByteArray()
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                user.image = fileR
+                intent.putExtra("userReturn", user)
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            }
         }
-        btn = findViewById<View>(R.id.button2) as Button
         imageview = findViewById<View>(R.id.imageView) as ImageView
 
-        btn!!.setOnClickListener {
+        imageview!!.setOnClickListener {
 
             showPictureDialog()
         }

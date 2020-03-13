@@ -1,9 +1,7 @@
 package com.example.detailsdemo
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -12,25 +10,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.custom_grid.view.*
 import kotlinx.android.synthetic.main.custome_list.view.*
 import kotlinx.android.synthetic.main.custome_list.view.displayGender
 import kotlinx.android.synthetic.main.custome_list.view.displayName
 import kotlinx.android.synthetic.main.custome_list.view.profilePic
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.lang.Exception
 
-class CustomListAdapter(context:Context, val data:ArrayList<User>):ArrayAdapter<User>(context, R.layout.custome_list, data){
+class CustomGridAdapter(context: Context, val data:ArrayList<User>):
+    ArrayAdapter<User>(context, R.layout.custom_grid, data) {
     val inflater = LayoutInflater.from(context)
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
-        val rowView :View
-        val viewHolder :ViewHolder
+        val rowView: View
+        val viewHolder: ViewHolder
         if (convertView == null) {
-            rowView =inflater.inflate(R.layout.custome_list, parent, false)
+            rowView = inflater.inflate(R.layout.custom_grid, parent, false)
 
             viewHolder = ViewHolder(rowView)
             rowView.tag = viewHolder
@@ -42,20 +37,19 @@ class CustomListAdapter(context:Context, val data:ArrayList<User>):ArrayAdapter<
 
         viewHolder.name.text = data[position].name
         viewHolder.gender.text = data[position].gender
-
         if(data[position].gender == "female"){
-            rowView.row.setBackgroundResource(R.drawable.female)
+            rowView.card.setBackgroundColor(Color.rgb(210,210,210))
         }
-
-        var bmp:Bitmap ?= null
+        var bmp: Bitmap? = null
         try {
-            bmp = BitmapFactory.decodeByteArray(data[position].image, 0 , data[position].image!!.size)
-        }
-        catch (e: Exception){
+            bmp =
+                BitmapFactory.decodeByteArray(data[position].image, 0, data[position].image!!.size)
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         viewHolder.image.setImageBitmap(bmp)
-        rowView.delete.setOnClickListener {
+
+        rowView.deleteBtn.setOnClickListener {
             val builder = AlertDialog.Builder(context)
 
             // Set the alert dialog title
@@ -68,11 +62,11 @@ class CustomListAdapter(context:Context, val data:ArrayList<User>):ArrayAdapter<
             builder.setPositiveButton("DELETE"){dialog, which ->
                 UsersArray.array.removeAt(position)
                 notifyDataSetChanged()
-                Toast.makeText(context,"Record deleted",Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,"Record deleted", Toast.LENGTH_SHORT).show()
             }
 
             builder.setNegativeButton("CANCEL"){dialog,which ->
-                Toast.makeText(context,"Cancel Pressed",Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,"Cancel Pressed", Toast.LENGTH_SHORT).show()
             }
 
             val dialog: AlertDialog = builder.create()
@@ -81,6 +75,7 @@ class CustomListAdapter(context:Context, val data:ArrayList<User>):ArrayAdapter<
             dialog.show()
 
         }
+
         return rowView
     }
     private class ViewHolder(view:View){
